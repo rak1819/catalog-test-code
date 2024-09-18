@@ -5,7 +5,6 @@ import java.util.TreeMap;
 pulbic class ShamirSecretSharing {
 
     public static void main(String[] args) {
-        // Input data with points
         String jsonInput = """
         {
             "keys": {
@@ -31,16 +30,14 @@ pulbic class ShamirSecretSharing {
         }
         """;
 
-        // Read and decode the input
         JSONObject jsonObject = new JSONObject(jsonInput);
         JSONObject keys = jsonObject.getJSONObject("keys");
         int n = keys.getInt("n");
         int k = keys.getInt("k");
 
-        // Create a map to store decoded points
         Map<Integer, Integer> points = new TreeMap<>();
 
-        // Iterate through the other keys to decode the y values
+
         for (String key : jsonObject.keySet()) {
             if (!key.equals("keys")) {
                 int x = Integer.parseInt(key); // x is the key of each point (e.g., 1, 2, 3, 6)
@@ -54,23 +51,20 @@ pulbic class ShamirSecretSharing {
             }
         }
 
-        // Use Lagrange Interpolation to find the constant term
         double constantTerm = lagrangeInterpolation(points);
         System.out.println("Constant term (c): " + constantTerm);
     }
 
-    // Lagrange Interpolation to calculate f(0) (the constant term 'c')
     public static double lagrangeInterpolation(Map<Integer, Integer> points) {
         double result = 0.0;
 
-        // Iterate over each point (xi, yi)
         for (Map.Entry<Integer, Integer> entry1 : points.entrySet()) {
             int xi = entry1.getKey();
             int yi = entry1.getValue();
 
             double term = yi;
 
-            // Multiply the term by (0 - xj) / (xi - xj) for each other point
+
             for (Map.Entry<Integer, Integer> entry2 : points.entrySet()) {
                 int xj = entry2.getKey();
                 if (xj != xi) {
@@ -78,7 +72,6 @@ pulbic class ShamirSecretSharing {
                 }
             }
 
-            // Add the term to the final result
             result += term;
         }
 
