@@ -1,0 +1,90 @@
+import org.json.JSONObject;
+import java.util.Map;
+import java.util.TreeMap;
+
+pulbic class ShamirSecretSharing {
+
+    public static void main(String[] args) {
+        // Input data with points
+        String jsonInput = """
+        {
+            "keys": {
+                "n": 4,
+                "k": 3
+            },
+            "1": {
+                "base": "10",
+                "value": "4"
+            },
+            "2": {
+                "base": "2",
+                "value": "111"
+            },
+            "3": {
+                "base": "10",
+                "value": "12"
+            },
+            "6": {
+                "base": "4",
+                "value": "213"
+            }
+        }
+        """;
+
+        // Read and decode the input
+        JSONObject jsonObject = new JSONObject(jsonInput);
+        JSONObject keys = jsonObject.getJSONObject("keys");
+        int n = keys.getInt("n");
+        int k = keys.getInt("k");
+
+        // Create a map to store decoded points
+        Map<Integer, Integer> points = new TreeMap<>();
+
+        // Iterate through the other keys to decode the y values
+        for (String key : jsonObject.keySet()) {
+            if (!key.equals("keys")) {
+                int x = Integer.parseInt(key); // x is the key of each point (e.g., 1, 2, 3, 6)
+                JSONObject rootData = jsonObject.getJSONObject(key); 
+                String encodedY = rootData.getString("value");
+                int base = Integer.parseInt(rootData.getString("base"));
+
+                // Decode the y value from the given base
+                int y = Integer.parseInt(encodedY, base);
+                points.put(x, y); // Store the (x, y) pair
+            }
+        }
+
+        // Use Lagrange Interpolation to find the constant term
+        double constantTerm = lagrangeInterpolation(points);
+        System.out.println("Constant term (c): " + constantTerm);
+    }
+
+    // Lagrange Interpolation to calculate f(0) (the constant term 'c')
+    public static double lagrangeInterpolation(Map<Integer, Integer> points) {
+        double result = 0.0;
+
+        // Iterate over each point (xi, yi)
+        for (Map.Entry<Integer, Integer> entry1 : points.entrySet()) {
+            int xi = entry1.getKey();
+            int yi = entry1.getValue();
+
+            double term = yi;
+
+            // Multiply the term by (0 - xj) / (xi - xj) for each other point
+            for (Map.Entry<Integer, Integer> entry2 : points.entrySet()) {
+                int xj = entry2.getKey();
+                if (xj != xi) {
+                    term *= (0.0 - xj) / (xi - xj);
+                }
+            }
+
+            // Add the term to the final result
+            result += term;
+        }
+
+        return result;
+    }
+}
+
+
+ouput : constant term (c): 3.0
